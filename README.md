@@ -2,7 +2,7 @@
 **Autonomous Open-Source Contribution & Developer Workflow Agent**  
 *Hackathon Track PS04: Open-Source Contribution and Developer Workflow Agent*  
 
-[![CI Pipeline](https://github.com/TricksXTech/repopilot/actions/workflows/ci.yml/badge.svg)](https://github.com/TricksXTech/repopilot/actions/workflows/ci.yml)
+[![CI Pipeline](https://github.com/TricksXTech/RepoPilot/actions/workflows/ci.yml/badge.svg)](https://github.com/TricksXTech/RepoPilot/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16.4.3-black.svg)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
@@ -116,8 +116,8 @@ RepoPilot was built security-first:
 ### Installation
 ```bash
 # 1. Clone repository
-git clone https://github.com/TricksXTech/repopilot.git
-cd repopilot
+git clone https://github.com/TricksXTech/RepoPilot.git
+cd RepoPilot
 
 # 2. Install dependencies (pinned lockfile)
 npm ci

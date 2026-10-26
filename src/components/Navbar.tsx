@@ -71,7 +71,7 @@ export function Navbar() {
         {/* Right Actions */}
         <div className="flex items-center gap-2.5">
           <a
-            href="https://github.com/TricksXTech/repopilot"
+            href="https://github.com/TricksXTech/RepoPilot"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white bg-zinc-100/80 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors min-h-[36px]"

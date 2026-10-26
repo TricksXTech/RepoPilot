@@ -25,7 +25,7 @@ export function Footer() {
             Terms
           </Link>
           <a
-            href="https://github.com/TricksXTech/repopilot"
+            href="https://github.com/TricksXTech/RepoPilot"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
