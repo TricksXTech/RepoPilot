@@ -23,7 +23,7 @@ code, pre, kbd, samp {
   font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* Subtle performance-friendly keyframes (< 400ms) */
+/* Subtle performance-friendly keyframes (< 400ms, transform and opacity only) */
 @keyframes heroFadeUp {
   from {
     opacity: 0;
@@ -32,6 +32,28 @@ code, pre, kbd, samp {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stepPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.85;
   }
 }
 
@@ -49,8 +71,32 @@ code, pre, kbd, samp {
   animation: heroFadeUp 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+.animate-fade-in-up {
+  animation: fadeInUp 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-step-pulse {
+  animation: stepPulse 1.4s ease-in-out infinite;
+}
+
 .animate-glow {
   animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+/* Staggered animation delays for lists and cards */
+.stagger-1 { animation-delay: 60ms; }
+.stagger-2 { animation-delay: 120ms; }
+.stagger-3 { animation-delay: 180ms; }
+.stagger-4 { animation-delay: 240ms; }
+.stagger-5 { animation-delay: 300ms; }
+
+/* Subtle hover lift for cards and example chips */
+.card-hover-lift {
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms cubic-bezier(0.16, 1, 0.3, 1), border-color 180ms ease;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-2px);
 }
 
 /* Reduced motion preference */

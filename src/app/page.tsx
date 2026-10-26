@@ -17,6 +17,7 @@ import {
   Database,
   UserX,
   AlertCircle,
+  AlertTriangle,
   RotateCcw,
   Sparkles,
 } from "lucide-react";
@@ -31,6 +32,8 @@ export default function HomePage() {
   const [evidence, setEvidence] = useState<RepoEvidence | null>(null);
   const [artifact, setArtifact] = useState<ContributionArtifact | null>(null);
   const [verification, setVerification] = useState<VerificationReport | null>(null);
+  const [aiUnavailable, setAiUnavailable] = useState(false);
+  const [aiUnavailableReason, setAiUnavailableReason] = useState<string | null>(null);
 
   // Mobile tab state
   const [mobileTab, setMobileTab] = useState<"evidence" | "artifact" | "verification">("evidence");
@@ -44,6 +47,8 @@ export default function HomePage() {
     setEvidence(null);
     setArtifact(null);
     setVerification(null);
+    setAiUnavailable(false);
+    setAiUnavailableReason(null);
     setMobileTab("evidence");
 
     try {
@@ -88,11 +93,15 @@ export default function HomePage() {
             if (data.message) setStatusMessage(data.message);
 
             if (data.evidence) setEvidence(data.evidence);
-            if (data.artifact) {
+            if (data.artifact !== undefined) {
               setArtifact(data.artifact);
-              setMobileTab("artifact");
+              if (data.artifact) {
+                setMobileTab("artifact");
+              }
             }
             if (data.verification) setVerification(data.verification);
+            if (data.aiUnavailable !== undefined) setAiUnavailable(data.aiUnavailable);
+            if (data.aiUnavailableReason) setAiUnavailableReason(data.aiUnavailableReason);
 
             if (data.stage === "error") {
               setErrorMessage(data.error?.message || "An unexpected error occurred.");
@@ -207,7 +216,23 @@ export default function HomePage() {
 
         {/* Results Experience */}
         {evidence && (
-          <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="space-y-8 animate-in fade-in duration-300 scroll-mt-16">
+            {/* AI Unavailable Banner (Requirement B8) */}
+            {aiUnavailable && (
+              <div className="w-full p-4 rounded-xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 flex items-start gap-3 text-amber-900 dark:text-amber-200 text-xs animate-fade-in-up">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+                <div className="space-y-0.5">
+                  <span className="font-semibold block text-sm text-amber-900 dark:text-amber-100">
+                    AI plan unavailable, showing evidence only
+                  </span>
+                  <p className="text-amber-700 dark:text-amber-300 text-xs leading-relaxed">
+                    {aiUnavailableReason ||
+                      "AI plan synthesis is disabled or temporarily unavailable. Complete repository evidence, governance docs, CI commands, and deterministic verification checks are active below."}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Mobile Tabs Bar: Evidence | Artifact | Verification */}
             <div className="block lg:hidden">
               <div className="flex border-b border-zinc-200 dark:border-zinc-800">
@@ -215,7 +240,7 @@ export default function HomePage() {
                   onClick={() => setMobileTab("evidence")}
                   className={`flex-1 py-2.5 text-center text-xs font-medium border-b-2 transition-colors ${
                     mobileTab === "evidence"
-                      ? "border-emerald-600 text-emerald-600 dark:text-emerald-400"
+                      ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 font-semibold"
                       : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
                   }`}
                 >
@@ -225,7 +250,7 @@ export default function HomePage() {
                   onClick={() => setMobileTab("artifact")}
                   className={`flex-1 py-2.5 text-center text-xs font-medium border-b-2 transition-colors ${
                     mobileTab === "artifact"
-                      ? "border-emerald-600 text-emerald-600 dark:text-emerald-400"
+                      ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 font-semibold"
                       : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
                   }`}
                 >
@@ -235,7 +260,7 @@ export default function HomePage() {
                   onClick={() => setMobileTab("verification")}
                   className={`flex-1 py-2.5 text-center text-xs font-medium border-b-2 transition-colors ${
                     mobileTab === "verification"
-                      ? "border-emerald-600 text-emerald-600 dark:text-emerald-400"
+                      ? "border-emerald-600 text-emerald-600 dark:text-emerald-400 font-semibold"
                       : "border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
                   }`}
                 >
@@ -255,8 +280,13 @@ export default function HomePage() {
                       <NextStepsGuide forkUrl={artifact.gitChecklist.forkUrl} repoName={evidence.meta.repo} />
                     </div>
                   ) : (
-                    <div className="p-8 text-center text-xs text-zinc-400 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800">
-                      Synthesizing contribution artifact...
+                    <div className="p-8 text-center text-xs text-zinc-500 dark:text-zinc-400 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 space-y-2">
+                      <p className="font-semibold text-zinc-800 dark:text-zinc-200 text-sm">
+                        No contribution plan generated yet
+                      </p>
+                      <p className="max-w-md mx-auto leading-relaxed">
+                        To generate a verified step-by-step contribution plan and unified diff, click <strong className="text-emerald-600 dark:text-emerald-400">&quot;Use this issue&quot;</strong> on any of the suggested issues in the Evidence tab, or specify an issue URL.
+                      </p>
                     </div>
                   )
                 )}

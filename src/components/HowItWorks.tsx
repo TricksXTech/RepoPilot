@@ -1,8 +1,30 @@
 "use client";
 
 import { Link2, SearchCheck, CheckCircle2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export function HowItWorks() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   const steps = [
     {
       number: "01",
@@ -28,7 +50,7 @@ export function HowItWorks() {
   ];
 
   return (
-    <section className="py-8 space-y-6">
+    <section ref={sectionRef} className="py-8 space-y-6">
       <div className="text-center space-y-1.5">
         <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
           How it works
@@ -39,12 +61,14 @@ export function HowItWorks() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {steps.map((step) => {
+        {steps.map((step, idx) => {
           const Icon = step.icon;
           return (
             <div
               key={step.number}
-              className="p-5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 space-y-3 shadow-sm hover:border-emerald-500/40 hover:-translate-y-0.5 transition-all duration-200 group"
+              className={`p-5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 space-y-3 shadow-sm hover:border-emerald-500/40 card-hover-lift group ${
+                isVisible ? `animate-fade-in-up stagger-${idx + 1}` : "opacity-0"
+              }`}
             >
               <div className="flex items-center justify-between">
                 <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">

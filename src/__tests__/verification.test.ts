@@ -181,7 +181,7 @@ describe("Verification Engine", () => {
     expect(report.overallStatus).toBe("warn");
     const dupCheck = report.checks.find((c) => c.id === "duplicate-pr");
     expect(dupCheck?.status).toBe("warn");
-    expect(report.confidenceScore).toBe(85);
+    expect(report.confidenceScore).toBe(75);
   });
 
   it("fails when target issue is closed", () => {

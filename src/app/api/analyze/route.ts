@@ -119,23 +119,56 @@ export async function POST(req: NextRequest) {
           evidence,
         });
 
-        // Stage 3: Synthesize Contribution Artifact (AI + Guardrails)
-        sendEvent({
-          stage: "generating",
-          progressPercent: 70,
-          message: `Synthesizing contribution plan, unified diff, PR draft, and commit message...`,
-          evidence,
-        });
+        // Stage 3: Synthesize Contribution Artifact (Only if an issue is selected)
+        let artifact = null;
+        let aiUnavailable = false;
+        let aiUnavailableReason: string | undefined;
 
-        const artifact = await generateContributionArtifact(evidence, rawTreePaths);
+        if (evidence.issue) {
+          sendEvent({
+            stage: "generating",
+            progressPercent: 70,
+            message: `Synthesizing contribution plan for issue #${evidence.issue.number}...`,
+            evidence,
+          });
+
+          const geminiKey = process.env.GEMINI_API_KEY?.trim();
+          if (!geminiKey || geminiKey === "your_gemini_api_key_here") {
+            // Server-side log without secrets (Requirement B8)
+            console.log(
+              `[RepoPilot Agent] Path: GEMINI_API_KEY not configured on server. Serving evidence only for ${owner}/${repo}#${evidence.issue.number}.`
+            );
+            aiUnavailable = true;
+            aiUnavailableReason = "GEMINI_API_KEY is not configured on the server. Showing empirical evidence only.";
+          } else {
+            console.log(
+              `[RepoPilot Agent] Path: Calling Gemini AI Provider (gemini-2.5-flash) for ${owner}/${repo}#${evidence.issue.number}.`
+            );
+            artifact = await generateContributionArtifact(evidence, rawTreePaths);
+            if (!artifact) {
+              console.log(
+                `[RepoPilot Agent] Path: Gemini synthesis failed or timed out. Serving evidence only for ${owner}/${repo}#${evidence.issue.number}.`
+              );
+              aiUnavailable = true;
+              aiUnavailableReason = "AI plan synthesis temporarily unavailable. Showing empirical evidence only.";
+            }
+          }
+        } else {
+          // No issue targeted (Requirement B7: do not generate a generic plan)
+          console.log(
+            `[RepoPilot Agent] Path: No target issue specified for ${owner}/${repo}. Skipping artifact generation; presenting top 5 suggested beginner issues.`
+          );
+        }
 
         // Stage 4: Deterministic Verification Engine
         sendEvent({
           stage: "verifying",
           progressPercent: 88,
-          message: `Running verification engine: checking touched files, duplicate PRs, and CONTRIBUTING compliance...`,
+          message: `Running deterministic verification checks...`,
           evidence,
           artifact,
+          aiUnavailable,
+          aiUnavailableReason,
         });
 
         const verification = runVerificationEngine(evidence, artifact, rawTreePaths);
@@ -144,10 +177,12 @@ export async function POST(req: NextRequest) {
         sendEvent({
           stage: "complete",
           progressPercent: 100,
-          message: `Analysis and verification complete with confidence score ${verification.confidenceScore}/100.`,
+          message: `Analysis complete`,
           evidence,
           artifact,
           verification,
+          aiUnavailable,
+          aiUnavailableReason,
         });
 
         controller.close();

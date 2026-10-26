@@ -55,6 +55,41 @@ describe("Ecosystem and Command Detection", () => {
     expect(res.testCommands).toContain("pytest");
   });
 
+  it("detects monorepos like refinedev/refine with biome and lerna lint scripts", () => {
+    const pkg = JSON.stringify({
+      scripts: {
+        lint: "biome check .",
+        "lint:ci": "biome ci .",
+        test: "lerna run test --stream",
+        build: "lerna run build",
+      },
+    });
+
+    const res = detectEcosystemAndCommands({
+      treePaths: [
+        "package.json",
+        "pnpm-lock.yaml",
+        "biome.json",
+        "lerna.json",
+        "packages/core/src/index.ts",
+      ],
+      packageJsonContent: pkg,
+    });
+
+    expect(res.packageManager).toBe("pnpm");
+    expect(res.lintCommands).toContain("pnpm lint");
+    expect(res.testCommands).toContain("pnpm test");
+  });
+
+  it("detects monorepos using turbo.json fallback", () => {
+    const res = detectEcosystemAndCommands({
+      treePaths: ["package.json", "pnpm-lock.yaml", "turbo.json", "apps/web/src/page.tsx"],
+      packageJsonContent: JSON.stringify({ scripts: { build: "turbo build" } }),
+    });
+
+    expect(res.lintCommands).toContain("pnpm turbo lint");
+  });
+
   it("returns 'Not found in repo' when test commands are missing", () => {
     const res = detectEcosystemAndCommands({
       treePaths: ["notes.txt", "doc.pdf"],

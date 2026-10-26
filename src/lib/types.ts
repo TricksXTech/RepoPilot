@@ -179,12 +179,14 @@ export interface VerificationReport {
 }
 
 export interface AnalysisPayload {
-  stage: "validating" | "evidence" | "generating" | "verifying" | "complete" | "error";
+  stage: "idle" | "validating" | "evidence" | "generating" | "verifying" | "complete" | "error";
   progressPercent: number;
   message: string;
   evidence?: RepoEvidence;
-  artifact?: ContributionArtifact;
+  artifact?: ContributionArtifact | null;
   verification?: VerificationReport;
+  aiUnavailable?: boolean;
+  aiUnavailableReason?: string;
   error?: {
     code: string;
     message: string;

@@ -99,15 +99,17 @@ export function SearchBar({ onAnalyze, isLoading }: SearchBarProps) {
       </form>
 
       {/* "What do I paste here?" Helper with collapsible explanation */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-500 dark:text-zinc-400 px-1">
-        <button
-          type="button"
-          onClick={() => setShowHelper(!showHelper)}
-          className="inline-flex items-center gap-1 text-[11px] text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-        >
-          <HelpCircle className="w-3 h-3" />
-          <span>What do I paste here?</span>
-        </button>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 text-xs text-zinc-500 dark:text-zinc-400 px-1">
+        <div className="flex items-center justify-start">
+          <button
+            type="button"
+            onClick={() => setShowHelper(!showHelper)}
+            className="inline-flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 hover:text-emerald-600 dark:text-zinc-400 dark:hover:text-emerald-400 transition-colors"
+          >
+            <HelpCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500" />
+            <span>What do I paste here?</span>
+          </button>
+        </div>
 
         {/* 3 Example Repository Chips */}
         <div className="flex flex-wrap items-center gap-1.5">
@@ -118,7 +120,7 @@ export function SearchBar({ onAnalyze, isLoading }: SearchBarProps) {
               type="button"
               onClick={() => selectExample(ex.url)}
               disabled={isLoading}
-              className="px-2 py-1 rounded-md bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-mono text-[11px] hover:-translate-y-0.5 active:scale-95 transition-all duration-150 flex items-center gap-1 min-h-[28px]"
+              className="px-2.5 py-1 rounded-md bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-mono text-[11px] card-hover-lift active:scale-95 transition-all flex items-center gap-1 min-h-[28px] shadow-xs"
             >
               <span>{ex.label}</span>
               <span className="text-[9px] px-1 py-0.2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 font-sans">

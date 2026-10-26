@@ -253,9 +253,28 @@ export async function collectRepositoryEvidence(
   const lowerPaths = treePaths.map((p) => ({ original: p, lower: p.toLowerCase() }));
 
   const findPath = (candidates: string[]) => {
+    // Priority 1: Exact root file match (e.g. "README.md", "package.json")
     for (const c of candidates) {
-      const match = lowerPaths.find((item) => item.lower === c || item.lower.endsWith(`/${c}`));
-      if (match) return match.original;
+      const rootMatch = lowerPaths.find((item) => item.lower === c);
+      if (rootMatch) return rootMatch.original;
+    }
+    // Priority 2: Standard folder match (.github/ or docs/)
+    for (const c of candidates) {
+      const stdMatch = lowerPaths.find(
+        (item) => item.lower === `.github/${c}` || item.lower === `docs/${c}`
+      );
+      if (stdMatch) return stdMatch.original;
+    }
+    // Priority 3: Any path ending with /candidate (excluding .changeset or test fixtures)
+    for (const c of candidates) {
+      const fallback = lowerPaths.find(
+        (item) =>
+          item.lower.endsWith(`/${c}`) &&
+          !item.lower.includes(".changeset") &&
+          !item.lower.includes("__tests__") &&
+          !item.lower.includes("fixtures")
+      );
+      if (fallback) return fallback.original;
     }
     return null;
   };

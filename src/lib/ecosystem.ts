@@ -56,26 +56,57 @@ export function detectEcosystemAndCommands(ctx: EcosystemContext): EcosystemComm
       try {
         const pkg = JSON.parse(packageJsonContent);
         const scripts = pkg.scripts || {};
+        const scriptKeys = Object.keys(scripts);
 
-        if (scripts.test && scripts.test !== "echo \"Error: no test specified\" && exit 1") {
-          testCommands.push(packageManager === "npm" ? "npm test" : `${packageManager} test`);
+        // Test command detection
+        const testKey = scriptKeys.find((k) =>
+          ["test", "test:all", "test:unit", "test:ci"].includes(k.toLowerCase())
+        );
+        if (testKey && scripts[testKey] !== 'echo "Error: no test specified" && exit 1') {
+          testCommands.push(packageManager === "npm" ? `npm test` : `${packageManager} ${testKey}`);
         }
-        if (scripts.lint) {
-          lintCommands.push(`${pmRun} lint`);
+
+        // Lint command detection (covers "lint", "lint:ci", "lint:all", "lint:check", "check:lint", "biome", "eslint")
+        const lintKey = scriptKeys.find((k) =>
+          ["lint", "lint:ci", "lint:all", "lint:check", "lint:error", "check:lint", "check"].includes(k.toLowerCase())
+        );
+        if (lintKey) {
+          lintCommands.push(`${pmRun} ${lintKey}`);
+        } else if (scripts.biome) {
+          lintCommands.push(`${pmRun} biome`);
         }
-        if (scripts.build) {
-          buildCommands.push(`${pmRun} build`);
+
+        // Build command detection
+        const buildKey = scriptKeys.find((k) =>
+          ["build", "build:all", "build:core"].includes(k.toLowerCase())
+        );
+        if (buildKey) {
+          buildCommands.push(`${pmRun} ${buildKey}`);
         }
-        if (scripts.typecheck || scripts["type-check"] || scripts.check) {
-          const tcKey = scripts.typecheck ? "typecheck" : scripts["type-check"] ? "type-check" : "check";
+
+        // Typecheck command detection
+        const tcKey = scriptKeys.find((k) =>
+          ["typecheck", "type-check", "check:types", "check"].includes(k.toLowerCase())
+        );
+        if (tcKey) {
           typecheckCommands.push(`${pmRun} ${tcKey}`);
         }
       } catch {
-        // Fallback default script guesses if JSON parse fails
         testCommands.push(`${packageManager} test`);
       }
     } else {
       testCommands.push(`${packageManager} test`);
+    }
+
+    // Monorepo & Tooling Fallbacks (Turbo, Nx, Biome, Lerna)
+    if (lintCommands.length === 0) {
+      if (pathsSet.has("turbo.json")) {
+        lintCommands.push(packageManager === "npm" ? "npx turbo run lint" : `${packageManager} turbo lint`);
+      } else if (pathsSet.has("biome.json") || pathsSet.has("biome.jsonc")) {
+        lintCommands.push("npx @biomejs/biome check .");
+      } else if (pathsSet.has("lerna.json")) {
+        lintCommands.push(packageManager === "npm" ? "npx lerna run lint" : `${packageManager} lerna run lint`);
+      }
     }
   }
 

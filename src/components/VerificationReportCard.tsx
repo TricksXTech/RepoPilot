@@ -8,7 +8,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VerificationReport } from "@/lib/types";
 import { JargonTooltip } from "./JargonTooltip";
 
@@ -18,25 +18,55 @@ interface VerificationReportCardProps {
 
 export function VerificationReportCard({ report }: VerificationReportCardProps) {
   const [showBreakdown, setShowBreakdown] = useState(false);
-  const { overallStatus, confidenceScore, confidenceExplanation, scoreBreakdown, checks } = report;
+  const { confidenceScore, confidenceExplanation, scoreBreakdown, checks } = report;
+
+  // Smooth Count-Up Animation (0 -> confidenceScore in under 400ms)
+  const [displayedScore, setDisplayedScore] = useState(() => {
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return confidenceScore;
+    }
+    return 0;
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    let startTimestamp: number | null = null;
+    const duration = 350;
+
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 2);
+      setDisplayedScore(Math.round(eased * confidenceScore));
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+
+    const animId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animId);
+  }, [confidenceScore]);
 
   // SVG Radial Circle calculation
   const radius = 38;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (confidenceScore / 100) * circumference;
+  const strokeDashoffset = circumference - (displayedScore / 100) * circumference;
 
   const scoreColor =
     confidenceScore >= 80
       ? "text-emerald-500 stroke-emerald-500"
-      : confidenceScore >= 60
+      : confidenceScore >= 50
       ? "text-amber-500 stroke-amber-500"
       : "text-rose-500 stroke-rose-500";
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl p-5 sm:p-6 shadow-sm space-y-6">
-      {/* 1. Circular Confidence Meter at the Top */}
-      <div className="flex flex-col items-center justify-center text-center space-y-3 pb-5 border-b border-zinc-100 dark:border-zinc-800/60">
-        <div className="relative w-28 h-28 flex items-center justify-center">
+      {/* 1. Circular Confidence Meter with Generous Spacing */}
+      <div className="flex flex-col items-center justify-center text-center space-y-4 pb-5 border-b border-zinc-100 dark:border-zinc-800/60">
+        <div className="relative w-28 h-28 flex items-center justify-center my-1">
           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
             {/* Background Circle */}
             <circle
@@ -52,7 +82,7 @@ export function VerificationReportCard({ report }: VerificationReportCardProps) 
               cx="50"
               cy="50"
               r={radius}
-              className={`${scoreColor} transition-all duration-1000 ease-out`}
+              className={`${scoreColor} transition-all duration-300 ease-out`}
               strokeWidth="7"
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
@@ -60,28 +90,33 @@ export function VerificationReportCard({ report }: VerificationReportCardProps) 
               fill="transparent"
             />
           </svg>
-          <div className="absolute flex flex-col items-center">
-            <span className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-mono">
-              {confidenceScore}
+          <div className="absolute flex flex-col items-center justify-center">
+            <span className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-mono leading-none">
+              {displayedScore}
             </span>
-            <span className="text-[10px] text-zinc-400 uppercase font-medium">
+            <span className="text-[10px] text-zinc-400 uppercase font-semibold tracking-wider mt-1.5">
               <JargonTooltip term="confidence">Confidence</JargonTooltip>
             </span>
           </div>
         </div>
 
-        <div className="space-y-1 max-w-sm">
-          <div className="flex items-center justify-center gap-1.5">
+        {/* Derived Badge & Plain-Language Explanation */}
+        <div className="space-y-1.5 max-w-sm pt-1">
+          <div className="flex items-center justify-center">
             <span
-              className={`px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wide ${
-                overallStatus === "pass"
-                  ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400"
-                  : overallStatus === "warn"
-                  ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
-                  : "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
+              className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
+                confidenceScore >= 80
+                  ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60"
+                  : confidenceScore >= 50
+                  ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/60"
+                  : "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/60"
               }`}
             >
-              {overallStatus} status
+              {confidenceScore >= 80
+                ? "High Confidence"
+                : confidenceScore >= 50
+                ? "Medium Confidence"
+                : "Low Confidence"}
             </span>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
@@ -101,7 +136,7 @@ export function VerificationReportCard({ report }: VerificationReportCardProps) 
             </button>
 
             {showBreakdown && (
-              <div className="mt-2 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-850 border border-zinc-200/60 dark:border-zinc-800 text-left text-xs space-y-1.5 w-full max-w-sm animate-in fade-in">
+              <div className="mt-2 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-850 border border-zinc-200/60 dark:border-zinc-800 text-left text-xs space-y-1.5 w-full max-w-sm animate-fade-in-up">
                 <div className="flex justify-between text-zinc-400 font-medium">
                   <span>Base Score</span>
                   <span>100 pts</span>
@@ -122,17 +157,19 @@ export function VerificationReportCard({ report }: VerificationReportCardProps) 
         )}
       </div>
 
-      {/* 2. Pass / Warn / Fail Checklist with Icons */}
+      {/* 2. Pass / Warn / Fail Checklist with Staggered Fade-in */}
       <div className="space-y-2">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
           Verification Checklist ({checks.length})
         </span>
 
         <div className="space-y-2">
-          {checks.map((chk) => (
+          {checks.map((chk, idx) => (
             <div
               key={chk.id}
-              className="p-3 rounded-lg border border-zinc-200/60 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-850/30 flex items-start justify-between gap-3 text-xs"
+              className={`p-3 rounded-lg border border-zinc-200/60 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-850/30 flex items-start justify-between gap-3 text-xs animate-fade-in-up stagger-${
+                Math.min(idx + 1, 5)
+              } card-hover-lift`}
             >
               <div className="flex items-start gap-2.5">
                 <div className="mt-0.5 shrink-0">

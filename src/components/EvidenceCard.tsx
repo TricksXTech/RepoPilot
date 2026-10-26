@@ -11,6 +11,7 @@ import {
   Terminal,
   Sparkles,
   ShieldAlert,
+  ArrowRight,
 } from "lucide-react";
 import { RepoEvidence } from "@/lib/types";
 import { JargonTooltip } from "./JargonTooltip";
@@ -110,68 +111,82 @@ export function EvidenceCard({ evidence, onSelectIssue }: EvidenceCardProps) {
         </div>
       )}
 
-      {/* 3. Governance Compact Cards with Green/Amber/Red Badges */}
+      {/* 3. Governance Compact Cards with Full Labels & Badge Below */}
       <div className="space-y-2">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-          <FileText className="w-3 h-3" /> Governance &amp; Templates
+          <FileText className="w-3.5 h-3.5" /> Governance &amp; Templates
         </span>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
           {/* README */}
-          <div className="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-850/50 border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between text-xs">
-            <span className="font-medium text-zinc-700 dark:text-zinc-300 truncate mr-1">README</span>
-            {governance.readme ? (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center gap-1 shrink-0">
-                <CheckCircle2 className="w-3 h-3" /> Found
-              </span>
-            ) : (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 flex items-center gap-1 shrink-0">
-                <XCircle className="w-3 h-3" /> None
-              </span>
-            )}
+          <div className="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-850/50 border border-zinc-200/60 dark:border-zinc-800 flex flex-col justify-between gap-2 text-xs card-hover-lift">
+            <span className="font-medium text-zinc-800 dark:text-zinc-200 break-words leading-tight">
+              README
+            </span>
+            <div>
+              {governance.readme ? (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">
+                  <CheckCircle2 className="w-3 h-3" /> Found
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400">
+                  <XCircle className="w-3 h-3" /> None
+                </span>
+              )}
+            </div>
           </div>
 
           {/* CONTRIBUTING */}
-          <div className="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-850/50 border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between text-xs">
-            <span className="font-medium text-zinc-700 dark:text-zinc-300 truncate mr-1">CONTRIBUTING</span>
-            {governance.contributing ? (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center gap-1 shrink-0">
-                <CheckCircle2 className="w-3 h-3" /> Found
-              </span>
-            ) : (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center gap-1 shrink-0">
-                <AlertTriangle className="w-3 h-3" /> Missing
-              </span>
-            )}
+          <div className="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-850/50 border border-zinc-200/60 dark:border-zinc-800 flex flex-col justify-between gap-2 text-xs card-hover-lift">
+            <span className="font-medium text-zinc-800 dark:text-zinc-200 break-words leading-tight">
+              CONTRIBUTING
+            </span>
+            <div>
+              {governance.contributing ? (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">
+                  <CheckCircle2 className="w-3 h-3" /> Found
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400">
+                  <AlertTriangle className="w-3 h-3" /> Missing
+                </span>
+              )}
+            </div>
           </div>
 
           {/* PR Template */}
-          <div className="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-850/50 border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between text-xs">
-            <span className="font-medium text-zinc-700 dark:text-zinc-300 truncate mr-1">
+          <div className="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-850/50 border border-zinc-200/60 dark:border-zinc-800 flex flex-col justify-between gap-2 text-xs card-hover-lift">
+            <span className="font-medium text-zinc-800 dark:text-zinc-200 break-words leading-tight">
               <JargonTooltip term="pr">PR Template</JargonTooltip>
             </span>
-            {governance.prTemplate ? (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center gap-1 shrink-0">
-                <CheckCircle2 className="w-3 h-3" /> Found
-              </span>
-            ) : (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center gap-1 shrink-0">
-                <AlertTriangle className="w-3 h-3" /> None
-              </span>
-            )}
+            <div>
+              {governance.prTemplate ? (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">
+                  <CheckCircle2 className="w-3 h-3" /> Found
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400">
+                  <AlertTriangle className="w-3 h-3" /> None
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Code of Conduct */}
-          <div className="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-850/50 border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between text-xs">
-            <span className="font-medium text-zinc-700 dark:text-zinc-300 truncate mr-1">Code of Conduct</span>
-            {governance.codeOfConduct ? (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center gap-1 shrink-0">
-                <CheckCircle2 className="w-3 h-3" /> Found
-              </span>
-            ) : (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-500 flex items-center gap-1 shrink-0">
-                <XCircle className="w-3 h-3" /> None
-              </span>
-            )}
+          <div className="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-850/50 border border-zinc-200/60 dark:border-zinc-800 flex flex-col justify-between gap-2 text-xs card-hover-lift">
+            <span className="font-medium text-zinc-800 dark:text-zinc-200 break-words leading-tight">
+              Code of Conduct
+            </span>
+            <div>
+              {governance.codeOfConduct ? (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">
+                  <CheckCircle2 className="w-3 h-3" /> Found
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
+                  <XCircle className="w-3 h-3" /> None
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -245,35 +260,64 @@ export function EvidenceCard({ evidence, onSelectIssue }: EvidenceCardProps) {
           )}
         </div>
       ) : suggestedIssues.length > 0 ? (
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-amber-500" />
-              Suggested First Issues ({suggestedIssues.length})
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              Recommended Beginner Issues ({suggestedIssues.length})
             </span>
             <span className="text-[10px] text-zinc-400">Select one to target</span>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             {suggestedIssues.map((sug) => (
               <div
                 key={sug.number}
-                className="p-2.5 rounded-lg bg-zinc-50/60 hover:bg-zinc-100/80 dark:bg-zinc-850/40 dark:hover:bg-zinc-800/60 border border-zinc-200/50 dark:border-zinc-800 transition-colors flex items-center justify-between gap-3 text-xs"
+                className="p-3.5 rounded-xl bg-zinc-50/70 hover:bg-zinc-100/90 dark:bg-zinc-850/40 dark:hover:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-800 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs card-hover-lift"
               >
-                <div className="truncate mr-2">
-                  <span className="font-mono text-emerald-600 dark:text-emerald-400 font-semibold mr-1.5">
-                    #{sug.number}
-                  </span>
-                  <span className="text-zinc-800 dark:text-zinc-200 font-medium">
-                    {sug.title}
-                  </span>
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                      #{sug.number}
+                    </span>
+                    <a
+                      href={sug.htmlUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-zinc-900 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 inline-flex items-center gap-1 break-words"
+                    >
+                      {sug.title}
+                      <ExternalLink className="w-3 h-3 text-zinc-400" />
+                    </a>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    {sug.labels.map((lbl) => (
+                      <span
+                        key={lbl}
+                        className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-zinc-200/70 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+                      >
+                        {lbl}
+                      </span>
+                    ))}
+                    <span className="text-[10px] text-zinc-400 ml-1">
+                      💬 {sug.commentsCount} {sug.commentsCount === 1 ? "comment" : "comments"}
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed italic">
+                    {sug.reason}
+                  </p>
                 </div>
+
                 {onSelectIssue && (
                   <button
+                    type="button"
                     onClick={() => onSelectIssue(sug.number)}
-                    className="shrink-0 px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-medium transition-colors min-h-[30px]"
+                    className="shrink-0 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-all shadow-xs active:scale-95 min-h-[34px] self-start sm:self-center"
                   >
-                    Select
+                    <span>Use this issue</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
