@@ -1,0 +1,42 @@
+name: RepoPilot CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  audit-lint-test-build:
+    name: Security Audit, Lint, Test & Production Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "npm"
+
+      - name: Install Pinned Dependencies
+        run: npm ci
+
+      - name: Dependency Vulnerability Audit
+        run: npm audit --audit-level=high
+
+      - name: Static Code Analysis & Lint
+        run: npm run lint
+
+      - name: Execute Security & Verification Test Suite
+        run: npm test
+
+      - name: Production Optimization Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1

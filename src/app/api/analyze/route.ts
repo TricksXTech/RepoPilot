@@ -1,0 +1,201 @@
+/**
+ * POST /api/analyze
+ * Server-Sent Events (SSE) Streaming Route for RepoPilot Agent
+ * Progressively streams:
+ * 1. "validating"
+ * 2. "evidence" (< 3s target)
+ * 3. "generating" (AI synthesis)
+ * 4. "verifying" (Deterministic rule engine)
+ * 5. "complete"
+ */
+import { NextRequest, NextResponse } from "next/server";
+import { parseAndValidateGitHubUrl, ValidationError, AnalysisRequestSchema } from "@/lib/validation";
+import { checkRateLimit } from "@/lib/ratelimit";
+import { collectRepositoryEvidence, GitHubApiError } from "@/lib/github";
+import { generateContributionArtifact } from "@/lib/gemini";
+import { runVerificationEngine } from "@/lib/verification";
+import { AnalysisPayload } from "@/lib/types";
+
+export const runtime = "nodejs";
+export const maxDuration = 45; // 45 seconds max timeout for Vercel Serverless
+
+export async function POST(req: NextRequest) {
+  // 1. IP Rate Limiting Guard
+  const clientIp =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    "127.0.0.1";
+
+  const rateLimit = checkRateLimit(clientIp);
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      {
+        error: {
+          code: "RATE_LIMITED",
+          message: `Too many requests from your IP. Please try again in ${rateLimit.resetSeconds} seconds.`,
+          resetSeconds: rateLimit.resetSeconds,
+        },
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": rateLimit.resetSeconds.toString(),
+          "X-RateLimit-Limit": rateLimit.limit.toString(),
+          "X-RateLimit-Remaining": "0",
+        },
+      }
+    );
+  }
+
+  // 2. Request Body Size & JSON Safety
+  let bodyJson: unknown;
+  try {
+    bodyJson = await req.json();
+  } catch {
+    return NextResponse.json(
+      { error: { code: "INVALID_JSON", message: "Malformed JSON request body." } },
+      { status: 400 }
+    );
+  }
+
+  // 3. Zod Input Validation
+  const parseResult = AnalysisRequestSchema.safeParse(bodyJson);
+  if (!parseResult.success) {
+    const errorMsg = parseResult.error.issues[0]?.message || "Invalid input parameters.";
+    return NextResponse.json(
+      { error: { code: "VALIDATION_FAILED", message: errorMsg } },
+      { status: 400 }
+    );
+  }
+
+  const { url, issueNumber } = parseResult.data;
+
+  // 4. Strict GitHub URL & SSRF parsing
+  let repoIdentifier;
+  try {
+    repoIdentifier = parseAndValidateGitHubUrl(url, issueNumber);
+  } catch (err: unknown) {
+    const msg = err instanceof ValidationError ? err.message : "Invalid repository URL.";
+    return NextResponse.json(
+      { error: { code: "INVALID_URL", message: msg } },
+      { status: 400 }
+    );
+  }
+
+  const { owner, repo, issueNumber: targetIssue } = repoIdentifier;
+
+  // 5. Initialize SSE Stream for progressive UI updates
+  const encoder = new TextEncoder();
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      const sendEvent = (payload: AnalysisPayload) => {
+        const msg = `data: ${JSON.stringify(payload)}\n\n`;
+        controller.enqueue(encoder.encode(msg));
+      };
+
+      try {
+        // Stage 1: Validating
+        sendEvent({
+          stage: "validating",
+          progressPercent: 10,
+          message: `Validating target repository ${owner}/${repo}...`,
+        });
+
+        // Stage 2: Fetch Repository Evidence (Parallel GitHub calls)
+        sendEvent({
+          stage: "validating",
+          progressPercent: 25,
+          message: `Collecting repository evidence via GitHub REST API (no clone, read-only)...`,
+        });
+
+        const { evidence, rawTreePaths } = await collectRepositoryEvidence(owner, repo, targetIssue);
+
+        // Emit Evidence payload immediately (< 3 seconds)
+        sendEvent({
+          stage: "evidence",
+          progressPercent: 50,
+          message: `Evidence gathered: ${evidence.tree.totalFiles} files indexed, ${evidence.meta.stars} stars, ecosystem: ${evidence.ecosystem.ecosystem}.`,
+          evidence,
+        });
+
+        // Stage 3: Synthesize Contribution Artifact (AI + Guardrails)
+        sendEvent({
+          stage: "generating",
+          progressPercent: 70,
+          message: `Synthesizing contribution plan, unified diff, PR draft, and commit message...`,
+          evidence,
+        });
+
+        const artifact = await generateContributionArtifact(evidence, rawTreePaths);
+
+        // Stage 4: Deterministic Verification Engine
+        sendEvent({
+          stage: "verifying",
+          progressPercent: 88,
+          message: `Running verification engine: checking touched files, duplicate PRs, and CONTRIBUTING compliance...`,
+          evidence,
+          artifact,
+        });
+
+        const verification = runVerificationEngine(evidence, artifact, rawTreePaths);
+
+        // Stage 5: Complete
+        sendEvent({
+          stage: "complete",
+          progressPercent: 100,
+          message: `Analysis and verification complete with confidence score ${verification.confidenceScore}/100.`,
+          evidence,
+          artifact,
+          verification,
+        });
+
+        controller.close();
+      } catch (err: unknown) {
+        console.error("[RepoPilot API Error]:", err instanceof Error ? err.message : err);
+
+        let clientMsg = "An error occurred while analyzing the repository.";
+        let errCode = "ANALYSIS_ERROR";
+        let resetAt: string | undefined;
+
+        if (err instanceof GitHubApiError) {
+          clientMsg = err.message;
+          errCode = err.isRateLimit ? "GITHUB_RATE_LIMITED" : "GITHUB_API_ERROR";
+          resetAt = err.rateLimitReset;
+        } else if (err instanceof ValidationError) {
+          clientMsg = err.message;
+          errCode = "VALIDATION_ERROR";
+        } else if (err instanceof Error) {
+          clientMsg = err.message;
+        }
+
+        sendEvent({
+          stage: "error",
+          progressPercent: 0,
+          message: clientMsg,
+          error: {
+            code: errCode,
+            message: clientMsg,
+            resetAt,
+          },
+        });
+
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
+      "X-Accel-Buffering": "no", // Disable buffering in reverse proxies
+    },
+  });
+}
+
+// Reject unexpected HTTP methods
+export async function GET() {
+  return NextResponse.json({ error: "Method Not Allowed. Use POST." }, { status: 405 });
+}
