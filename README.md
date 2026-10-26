@@ -173,7 +173,17 @@ npm audit
 
 ---
 
-## 8. GitHub Repository Configuration Checklist
+## 8. Troubleshooting & Vercel Build Notes
+
+### `npm warn Unknown env config "cache-dir"`
+If you observe `npm warn Unknown env config "cache-dir"` in Vercel build logs:
+- **Origin:** This warning originates from Vercel's legacy build container injecting `NPM_CONFIG_CACHE_DIR` into newer npm versions (v10+), where the configuration flag was renamed from `cache-dir` to `cache`.
+- **Impact:** It is completely benign and does not affect the build, installation, or runtime behavior.
+- **Verification:** The repository contains no `.npmrc` file and does not define `cache-dir`.
+
+---
+
+## 9. GitHub Repository Configuration Checklist
 For production deployment, enable the following in repository settings:
 - [x] **Secret scanning with Push Protection:** Prevents accidental commits of API keys.
 - [x] **Dependabot Security Updates:** Automated pull requests for outdated packages.
