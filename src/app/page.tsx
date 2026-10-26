@@ -8,6 +8,9 @@ import { ProgressTracker } from "@/components/ProgressTracker";
 import { EvidenceCard } from "@/components/EvidenceCard";
 import { ContributionArtifactCard } from "@/components/ContributionArtifactCard";
 import { VerificationReportCard } from "@/components/VerificationReportCard";
+import { HowItWorks } from "@/components/HowItWorks";
+import { FAQ } from "@/components/FAQ";
+import { NextStepsGuide } from "@/components/NextStepsGuide";
 import { RepoEvidence, ContributionArtifact, VerificationReport, AnalysisPayload } from "@/lib/types";
 import {
   Lock,
@@ -87,7 +90,6 @@ export default function HomePage() {
             if (data.evidence) setEvidence(data.evidence);
             if (data.artifact) {
               setArtifact(data.artifact);
-              // Auto-advance mobile tab to artifact when ready
               setMobileTab("artifact");
             }
             if (data.verification) setVerification(data.verification);
@@ -120,23 +122,27 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col bg-zinc-50/50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors">
       <Navbar />
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-10">
-        {/* Hero Section */}
-        <div className="text-center max-w-2xl mx-auto space-y-4">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-12">
+        {/* Hero Section with gentle fade-up animation */}
+        <div className="text-center max-w-2xl mx-auto space-y-4 animate-hero-fade">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-zinc-900 dark:text-white leading-[1.15]">
-            Good first contributions, <span className="text-emerald-600 dark:text-emerald-400">verified by evidence</span>.
+            Good first contributions,{" "}
+            <span className="text-emerald-600 dark:text-emerald-400 underline decoration-emerald-500/30 decoration-wavy decoration-2">
+              verified by evidence
+            </span>
+            .
           </h1>
           <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-lg mx-auto leading-relaxed">
-            RepoPilot analyzes public GitHub repositories and generates an actionable plan, unified diff, and PR draft with zero code execution.
+            Find a beginner-friendly issue and get a step-by-step plan to fix it—with exact files to touch, a suggested diff, and ready-to-run git commands.
           </p>
 
-          {/* Search Bar with 3 Chips */}
+          {/* Search Bar with 3 Chips and Helper */}
           <div className="pt-2">
             <SearchBar onAnalyze={startAnalysis} isLoading={isLoading} />
           </div>
 
           {/* Small Trust Badges */}
-          <div className="flex flex-wrap items-center justify-center gap-5 pt-3 text-xs text-zinc-400 dark:text-zinc-500">
+          <div className="flex flex-wrap items-center justify-center gap-5 pt-2 text-xs text-zinc-400 dark:text-zinc-500">
             <span className="inline-flex items-center gap-1.5">
               <Lock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500" />
               <span>Read-only</span>
@@ -157,7 +163,7 @@ export default function HomePage() {
         {/* Sticky Step Progress Indicator */}
         <ProgressTracker stage={stage} percent={progressPercent} message={statusMessage} />
 
-        {/* Error State with Try Again Button */}
+        {/* Error State with Clear Message & Try Again Button */}
         {errorMessage && (
           <div className="w-full max-w-2xl mx-auto p-5 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-rose-900 dark:text-rose-200 text-sm animate-in fade-in">
             <div className="flex items-start gap-3">
@@ -170,7 +176,7 @@ export default function HomePage() {
             {currentUrl && (
               <button
                 onClick={() => startAnalysis(currentUrl)}
-                className="shrink-0 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-medium inline-flex items-center gap-1.5 transition-colors min-h-[36px]"
+                className="shrink-0 px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-medium inline-flex items-center gap-1.5 transition-colors min-h-[36px]"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Try again</span>
@@ -201,7 +207,7 @@ export default function HomePage() {
 
         {/* Results Experience */}
         {evidence && (
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="space-y-8 animate-in fade-in duration-300">
             {/* Mobile Tabs Bar: Evidence | Artifact | Verification */}
             <div className="block lg:hidden">
               <div className="flex border-b border-zinc-200 dark:border-zinc-800">
@@ -244,7 +250,10 @@ export default function HomePage() {
                 )}
                 {mobileTab === "artifact" && (
                   artifact ? (
-                    <ContributionArtifactCard artifact={artifact} evidence={evidence} />
+                    <div className="space-y-6">
+                      <ContributionArtifactCard artifact={artifact} evidence={evidence} />
+                      <NextStepsGuide forkUrl={artifact.gitChecklist.forkUrl} repoName={evidence.meta.repo} />
+                    </div>
                   ) : (
                     <div className="p-8 text-center text-xs text-zinc-400 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800">
                       Synthesizing contribution artifact...
@@ -283,54 +292,20 @@ export default function HomePage() {
               </div>
 
               {artifact && (
-                <div className="w-full">
+                <div className="w-full space-y-6">
                   <ContributionArtifactCard artifact={artifact} evidence={evidence} />
+                  <NextStepsGuide forkUrl={artifact.gitChecklist.forkUrl} repoName={evidence.meta.repo} />
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* Empty State / Feature Grid (when idle) */}
-        {stage === "idle" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-8">
-            <div className="p-6 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 space-y-2 shadow-sm">
-              <div className="w-7 h-7 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs">
-                1
-              </div>
-              <h3 className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">
-                Repository Evidence
-              </h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                Queries GitHub REST API (recursive tree, governance files, CI workflows, test commands, commit style) with zero code execution.
-              </p>
-            </div>
+        {/* How It Works Section */}
+        <HowItWorks />
 
-            <div className="p-6 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 space-y-2 shadow-sm">
-              <div className="w-7 h-7 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs">
-                2
-              </div>
-              <h3 className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">
-                Contribution Artifact
-              </h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                Generates a plain-language summary, exact file plan, suggested unified diff, repo-templated PR draft, and git CLI checklist.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 space-y-2 shadow-sm">
-              <div className="w-7 h-7 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs">
-                3
-              </div>
-              <h3 className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">
-                Empirical Verification
-              </h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                Verifies every claimed file exists in git tree, checks for duplicate open PRs, verifies test commands, and scores confidence (0-100).
-              </p>
-            </div>
-          </div>
-        )}
+        {/* FAQ Section */}
+        <FAQ />
       </main>
 
       <Footer />

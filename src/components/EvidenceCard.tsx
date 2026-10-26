@@ -13,6 +13,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { RepoEvidence } from "@/lib/types";
+import { JargonTooltip } from "./JargonTooltip";
 
 interface EvidenceCardProps {
   evidence: RepoEvidence;
@@ -145,7 +146,9 @@ export function EvidenceCard({ evidence, onSelectIssue }: EvidenceCardProps) {
 
           {/* PR Template */}
           <div className="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-850/50 border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between text-xs">
-            <span className="font-medium text-zinc-700 dark:text-zinc-300 truncate mr-1">PR Template</span>
+            <span className="font-medium text-zinc-700 dark:text-zinc-300 truncate mr-1">
+              <JargonTooltip term="pr">PR Template</JargonTooltip>
+            </span>
             {governance.prTemplate ? (
               <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center gap-1 shrink-0">
                 <CheckCircle2 className="w-3 h-3" /> Found

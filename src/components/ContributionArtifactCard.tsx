@@ -14,6 +14,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { ContributionArtifact, RepoEvidence } from "@/lib/types";
+import { JargonTooltip } from "./JargonTooltip";
 
 interface ContributionArtifactCardProps {
   artifact: ContributionArtifact;
@@ -194,7 +195,7 @@ ${artifact.gitChecklist.commands
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
-              Suggested Unified Diff
+              Suggested Unified <JargonTooltip term="diff">Diff</JargonTooltip>
             </span>
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 font-mono">
               {artifact.suggestedDiff.disclaimer}
@@ -292,7 +293,7 @@ ${artifact.gitChecklist.commands
         <div className="p-4 rounded-xl border border-zinc-200/60 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-850/30 space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-              <GitPullRequest className="w-3.5 h-3.5 text-indigo-500" /> Draft PR
+              <GitPullRequest className="w-3.5 h-3.5 text-indigo-500" /> Draft <JargonTooltip term="pr">Pull Request</JargonTooltip>
             </span>
             <button
               onClick={() => copyToClipboard(`${artifact.draftPR.title}\n\n${artifact.draftPR.body}`, "pr")}
@@ -329,7 +330,7 @@ ${artifact.gitChecklist.commands
         <div className="p-4 rounded-xl border border-zinc-200/60 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-850/30 space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-              <GitCommit className="w-3.5 h-3.5 text-emerald-500" /> Draft Commit
+              <GitCommit className="w-3.5 h-3.5 text-emerald-500" /> Draft <JargonTooltip term="commit">Commit</JargonTooltip>
             </span>
             <button
               onClick={() => copyToClipboard(artifact.draftCommit.message, "commit")}

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { VerificationReport } from "@/lib/types";
+import { JargonTooltip } from "./JargonTooltip";
 
 interface VerificationReportCardProps {
   report: VerificationReport;
@@ -63,7 +64,9 @@ export function VerificationReportCard({ report }: VerificationReportCardProps) 
             <span className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-mono">
               {confidenceScore}
             </span>
-            <span className="text-[10px] text-zinc-400 uppercase font-medium">Confidence</span>
+            <span className="text-[10px] text-zinc-400 uppercase font-medium">
+              <JargonTooltip term="confidence">Confidence</JargonTooltip>
+            </span>
           </div>
         </div>
 
