@@ -105,96 +105,78 @@ ${artifact.gitChecklist.commands
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `repopilot-contribution-${evidence.meta.repo}.md`;
+    link.download = `repopilot-plan-${evidence.meta.repo}.md`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
+  const diffLines = artifact.suggestedDiff.unifiedDiff.split("\n");
+
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-6">
-      {/* 1. Header with AI Disclaimer and Export Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl p-5 sm:p-6 shadow-sm space-y-6">
+      {/* 1. Header with AI Disclaimer and Download Button */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-zinc-800/60 pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            <h2 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
               Contribution Artifact
             </h2>
-            <span className="px-2.5 py-0.5 text-xs font-semibold bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 rounded-full border border-amber-300 dark:border-amber-800 flex items-center gap-1">
-              <AlertCircle className="w-3.5 h-3.5" /> AI-generated, please review
+            <span className="px-2 py-0.5 text-[10px] font-medium bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 rounded-md border border-amber-200 dark:border-amber-800/60 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" /> AI-generated, review before use
             </span>
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            Ground-truth contribution strategy, verified code diff, and PR templates.
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Synthesized contribution plan, verified code diff, and PR template.
           </p>
         </div>
 
-        {/* Export Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() =>
-              copyToClipboard(
-                JSON.stringify(artifact, null, 2),
-                "full-json"
-              )
-            }
-            className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition-colors min-h-[44px]"
-            title="Copy Raw Data"
-          >
-            {copiedKey === "full-json" ? (
-              <Check className="w-3.5 h-3.5 text-emerald-500" />
-            ) : (
-              <Copy className="w-3.5 h-3.5" />
-            )}
-            <span>{copiedKey === "full-json" ? "Copied JSON" : "Copy Data"}</span>
-          </button>
-
+        {/* Export Action */}
+        <div className="flex items-center gap-2">
           <button
             onClick={downloadMarkdown}
-            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium flex items-center gap-1.5 shadow-sm transition-colors min-h-[44px]"
+            className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium flex items-center gap-1.5 transition-colors min-h-[38px] shadow-sm"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5" />
             <span>Download .md</span>
           </button>
         </div>
       </div>
 
       {/* 2. Plain-Language Summary */}
-      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 space-y-1.5">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-          Executive Summary
+      <div className="p-4 rounded-xl bg-zinc-50/70 dark:bg-zinc-850/40 border border-zinc-200/60 dark:border-zinc-800 space-y-1.5">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+          Issue Summary
         </span>
-        <p className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-sans">
+        <p className="text-xs sm:text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed font-sans">
           {artifact.issueSummary}
         </p>
       </div>
 
-      {/* 3. Step-by-Step Action Plan */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-          Step-by-Step Plan
-        </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400">{artifact.plan.overview}</p>
-
-        <div className="space-y-2.5">
+      {/* 3. Step-by-Step Plan */}
+      <div className="space-y-2.5">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+          Action Plan ({artifact.plan.steps.length} Steps)
+        </span>
+        <div className="space-y-2">
           {artifact.plan.steps.map((step) => (
             <div
               key={step.stepNumber}
-              className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex items-start gap-3"
+              className="p-3.5 rounded-lg border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-start gap-3 text-xs"
             >
-              <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+              <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 font-semibold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
                 {step.stepNumber}
               </div>
-              <div className="space-y-1 text-xs sm:text-sm">
-                <h4 className="font-semibold text-slate-900 dark:text-white">{step.title}</h4>
-                <p className="text-slate-600 dark:text-slate-300 leading-relaxed">{step.description}</p>
+              <div className="space-y-1">
+                <div className="font-semibold text-zinc-900 dark:text-zinc-100">{step.title}</div>
+                <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">{step.description}</p>
                 {step.targetFiles.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {step.targetFiles.map((tf) => (
                       <span
                         key={tf}
-                        className="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700"
+                        className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-emerald-600 dark:text-emerald-400"
                       >
                         {tf}
                       </span>
@@ -207,157 +189,135 @@ ${artifact.gitChecklist.commands
         </div>
       </div>
 
-      {/* 4. Touched Files Table */}
-      <div className="space-y-2.5">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-          Verified Files to Touch ({artifact.touchedFiles.length})
-        </h3>
-        <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 border-b border-slate-200 dark:border-slate-800">
-              <tr>
-                <th className="py-2.5 px-3 font-medium">File Path</th>
-                <th className="py-2.5 px-3 font-medium">Action</th>
-                <th className="py-2.5 px-3 font-medium">Tree Status</th>
-                <th className="py-2.5 px-3 font-medium">Reason</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
-              {artifact.touchedFiles.map((tf) => (
-                <tr key={tf.path} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                  <td className="py-2.5 px-3 font-medium text-slate-800 dark:text-slate-200">
-                    <a
-                      href={tf.githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-1 font-mono"
-                    >
-                      {tf.path} <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </td>
-                  <td className="py-2.5 px-3">
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
-                        tf.action === "create"
-                          ? "bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300"
-                          : "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
-                      }`}
-                    >
-                      {tf.action}
-                    </span>
-                  </td>
-                  <td className="py-2.5 px-3">
-                    {tf.existsInTree ? (
-                      <span className="text-emerald-600 dark:text-emerald-400 font-sans font-medium text-[11px] inline-flex items-center gap-1">
-                        ✓ Verified in Tree
-                      </span>
-                    ) : tf.action === "create" ? (
-                      <span className="text-teal-600 dark:text-teal-400 font-sans font-medium text-[11px]">
-                        + Proposed New File
-                      </span>
-                    ) : (
-                      <span className="text-amber-500 font-sans font-medium text-[11px]">
-                        ⚠ Unverified Path
-                      </span>
-                    )}
-                  </td>
-                  <td className="py-2.5 px-3 font-sans text-slate-600 dark:text-slate-400">
-                    {tf.reason}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* 5. Unified Diff Preview */}
+      {/* 4. Diff Viewer with Line Numbers & Green/Red Highlighting */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
               Suggested Unified Diff
-            </h3>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 font-mono">
+            </span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 font-mono">
               {artifact.suggestedDiff.disclaimer}
             </span>
           </div>
           <button
             onClick={() => copyToClipboard(artifact.suggestedDiff.unifiedDiff, "diff")}
-            className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 inline-flex items-center gap-1 min-h-[36px] px-2"
+            className="text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 inline-flex items-center gap-1 min-h-[36px] px-2"
           >
-            {copiedKey === "diff" ? (
-              <Check className="w-3.5 h-3.5 text-emerald-500" />
-            ) : (
-              <Copy className="w-3.5 h-3.5" />
-            )}
+            {copiedKey === "diff" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copiedKey === "diff" ? "Copied" : "Copy Diff"}</span>
           </button>
         </div>
 
-        {/* Diff Container */}
-        <div className="relative rounded-xl overflow-hidden border border-slate-300 dark:border-slate-800 bg-slate-950 text-slate-100 font-mono text-xs">
-          <div className="p-3 bg-slate-900 border-b border-slate-800 text-[11px] text-slate-400">
-            {artifact.suggestedDiff.explanation}
+        {/* Diff Box Container */}
+        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-950 text-zinc-100 overflow-hidden font-mono text-xs">
+          <div className="px-4 py-2.5 bg-zinc-900/90 border-b border-zinc-800 text-[11px] text-zinc-400 flex items-center justify-between">
+            <span>{artifact.suggestedDiff.explanation}</span>
+            <span className="text-zinc-500">{diffLines.length} lines</span>
           </div>
-          <pre className="p-4 overflow-x-auto max-h-72 leading-relaxed">
-            {artifact.suggestedDiff.unifiedDiff.split("\n").map((line, idx) => {
-              let lineClass = "text-slate-300";
-              if (line.startsWith("+") && !line.startsWith("+++")) {
-                lineClass = "text-emerald-400 bg-emerald-950/40 -mx-4 px-4 block";
-              } else if (line.startsWith("-") && !line.startsWith("---")) {
-                lineClass = "text-rose-400 bg-rose-950/40 -mx-4 px-4 block";
-              } else if (line.startsWith("@@")) {
-                lineClass = "text-cyan-400 bg-cyan-950/20 -mx-4 px-4 block";
-              } else if (line.startsWith("---") || line.startsWith("+++")) {
-                lineClass = "text-amber-300 font-semibold";
-              }
-              return (
-                <span key={idx} className={lineClass}>
-                  {line}
-                  {"\n"}
-                </span>
-              );
-            })}
-          </pre>
+          <div className="overflow-x-auto max-h-80 p-3 leading-relaxed">
+            <table className="w-full border-collapse">
+              <tbody>
+                {diffLines.map((line, idx) => {
+                  const lineNum = idx + 1;
+                  const isAddition = line.startsWith("+") && !line.startsWith("+++");
+                  const isDeletion = line.startsWith("-") && !line.startsWith("---");
+                  const isHunk = line.startsWith("@@");
+                  const isHeader = line.startsWith("---") || line.startsWith("+++");
+
+                  const rowBg = isAddition
+                    ? "bg-emerald-950/30 text-emerald-300"
+                    : isDeletion
+                    ? "bg-rose-950/30 text-rose-300"
+                    : isHunk
+                    ? "bg-cyan-950/20 text-cyan-400"
+                    : isHeader
+                    ? "text-amber-300 font-semibold"
+                    : "text-zinc-300";
+
+                  return (
+                    <tr key={idx} className={`${rowBg} hover:bg-zinc-900/50 transition-colors`}>
+                      <td className="w-10 pr-3 text-right select-none text-zinc-600 text-[10px] align-top py-0.5">
+                        {lineNum}
+                      </td>
+                      <td className="whitespace-pre py-0.5 font-mono text-[11px]">{line}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      {/* 6. Draft PR & Draft Commit Section */}
+      {/* 5. Touched Files Verification */}
+      <div className="space-y-2">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+          Target Files ({artifact.touchedFiles.length})
+        </span>
+        <div className="divide-y divide-zinc-100 dark:divide-zinc-800 border border-zinc-200/60 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-900 text-xs">
+          {artifact.touchedFiles.map((tf) => (
+            <div key={tf.path} className="p-3 flex items-center justify-between gap-2">
+              <div className="space-y-0.5 truncate">
+                <a
+                  href={tf.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono font-medium text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1 truncate"
+                >
+                  <span>{tf.path}</span>
+                  <ExternalLink className="w-3 h-3 shrink-0" />
+                </a>
+                <div className="text-zinc-500 text-[11px]">{tf.reason}</div>
+              </div>
+              <div className="shrink-0">
+                {tf.existsInTree ? (
+                  <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded">
+                    Verified in tree
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-medium text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+                    New file
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 6. Draft PR & Draft Commit */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Draft PR */}
-        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-850 space-y-2.5">
+        <div className="p-4 rounded-xl border border-zinc-200/60 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-850/30 space-y-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-              <GitPullRequest className="w-3.5 h-3.5 text-indigo-500" /> Draft Pull Request
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+              <GitPullRequest className="w-3.5 h-3.5 text-indigo-500" /> Draft PR
             </span>
             <button
               onClick={() => copyToClipboard(`${artifact.draftPR.title}\n\n${artifact.draftPR.body}`, "pr")}
-              className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 inline-flex items-center gap-1 min-h-[36px] px-2"
+              className="text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 inline-flex items-center gap-1 min-h-[36px] px-2"
             >
-              {copiedKey === "pr" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedKey === "pr" ? "Copied" : "Copy PR"}</span>
+              {copiedKey === "pr" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+              <span>{copiedKey === "pr" ? "Copied" : "Copy"}</span>
             </button>
           </div>
-          <div className="space-y-1">
-            <span className="text-[11px] text-slate-400">Title:</span>
-            <div className="p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-900 dark:text-white truncate">
-              {artifact.draftPR.title}
-            </div>
+          <div className="p-2.5 rounded bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+            {artifact.draftPR.title}
           </div>
-          <div className="space-y-1">
-            <div className="flex justify-between items-center text-[11px] text-slate-400">
-              <span>Description {artifact.draftPR.templateUsed && "(Follows PR Template)"}:</span>
+          <div>
+            <div className="flex justify-between items-center text-[10px] text-zinc-400 pb-1">
+              <span>Body:</span>
               <button
                 onClick={() => setShowFullPR(!showFullPR)}
-                className="text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 hover:underline"
+                className="text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-0.5"
               >
                 {showFullPR ? "Collapse" : "Expand"} {showFullPR ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
               </button>
             </div>
             <pre
-              className={`p-2.5 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 font-mono whitespace-pre-wrap ${
-                showFullPR ? "max-h-96" : "max-h-28"
+              className={`p-2.5 rounded bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 text-[11px] text-zinc-600 dark:text-zinc-300 font-mono whitespace-pre-wrap ${
+                showFullPR ? "max-h-80" : "max-h-24"
               } overflow-y-auto`}
             >
               {artifact.draftPR.body}
@@ -366,58 +326,49 @@ ${artifact.gitChecklist.commands
         </div>
 
         {/* Draft Commit */}
-        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-850 space-y-2.5">
+        <div className="p-4 rounded-xl border border-zinc-200/60 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-850/30 space-y-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-              <GitCommit className="w-3.5 h-3.5 text-emerald-500" /> Draft Commit Message
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+              <GitCommit className="w-3.5 h-3.5 text-emerald-500" /> Draft Commit
             </span>
             <button
               onClick={() => copyToClipboard(artifact.draftCommit.message, "commit")}
-              className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 inline-flex items-center gap-1 min-h-[36px] px-2"
+              className="text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 inline-flex items-center gap-1 min-h-[36px] px-2"
             >
-              {copiedKey === "commit" ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              {copiedKey === "commit" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
               <span>{copiedKey === "commit" ? "Copied" : "Copy"}</span>
             </button>
           </div>
-          <div className="space-y-1">
-            <span className="text-[11px] text-slate-400">
-              Style: <strong className="text-emerald-600 dark:text-emerald-400 uppercase">{artifact.draftCommit.styleFollowed}</strong>
-            </span>
-            <div className="p-3 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-800 dark:text-slate-200">
-              {artifact.draftCommit.message}
-            </div>
+          <div className="text-[11px] text-zinc-400">
+            Style: <span className="font-semibold text-emerald-600 dark:text-emerald-400 uppercase">{artifact.draftCommit.styleFollowed}</span>
+          </div>
+          <div className="p-3 rounded bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 text-xs font-mono text-zinc-800 dark:text-zinc-200">
+            {artifact.draftCommit.message}
           </div>
         </div>
       </div>
 
-      {/* 7. Terminal Git Checklist */}
-      <div className="space-y-2.5">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-          <Terminal className="w-4 h-4 text-emerald-500" /> Contributor Terminal Command Checklist
-        </h3>
-        <div className="space-y-2">
+      {/* 7. Terminal Checklist */}
+      <div className="space-y-2">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+          <Terminal className="w-3.5 h-3.5 text-emerald-500" /> Git Terminal Commands
+        </span>
+        <div className="space-y-1.5">
           {artifact.gitChecklist.commands.map((item, idx) => (
             <div
               key={idx}
-              className="p-3 rounded-xl bg-slate-900 text-slate-100 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+              className="p-2.5 rounded-lg bg-zinc-950 text-zinc-100 border border-zinc-800 flex items-center justify-between gap-2 text-xs"
             >
-              <div className="space-y-1 overflow-hidden">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-emerald-400">{item.step}:</span>
-                  <span className="text-slate-400 text-[11px]">{item.description}</span>
-                </div>
-                <code className="font-mono text-slate-200 block truncate">{item.command}</code>
+              <div className="overflow-hidden space-y-0.5">
+                <span className="text-[10px] text-zinc-400 block">{item.step} - {item.description}</span>
+                <code className="font-mono text-[11px] text-emerald-400 block truncate">{item.command}</code>
               </div>
               <button
                 onClick={() => copyToClipboard(item.command, `cmd-${idx}`)}
-                className="shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors flex items-center gap-1 min-h-[36px]"
+                className="shrink-0 px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[11px] transition-colors flex items-center gap-1 min-h-[32px]"
                 aria-label={`Copy ${item.step}`}
               >
-                {copiedKey === `cmd-${idx}` ? (
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                ) : (
-                  <Copy className="w-3.5 h-3.5" />
-                )}
+                {copiedKey === `cmd-${idx}` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                 <span>{copiedKey === `cmd-${idx}` ? "Copied" : "Copy"}</span>
               </button>
             </div>

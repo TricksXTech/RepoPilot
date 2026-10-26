@@ -4,13 +4,13 @@ import {
   GitFork,
   Star,
   FileText,
-  ShieldAlert,
-  CheckCircle,
+  CheckCircle2,
+  AlertTriangle,
   XCircle,
   ExternalLink,
   Terminal,
   Sparkles,
-  AlertTriangle,
+  ShieldAlert,
 } from "lucide-react";
 import { RepoEvidence } from "@/lib/types";
 
@@ -22,70 +22,64 @@ interface EvidenceCardProps {
 export function EvidenceCard({ evidence, onSelectIssue }: EvidenceCardProps) {
   const { meta, languages, governance, ecosystem, commitStyle, issue, suggestedIssues, tree } = evidence;
 
-  // Compute top language
   const languageEntries = Object.entries(languages);
   const totalLangBytes = languageEntries.reduce((sum, [, b]) => sum + b, 0);
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-6">
-      {/* 1. Header: Repo Info & Quick Badges */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
-        <div className="space-y-1">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl p-5 sm:p-6 shadow-sm space-y-6">
+      {/* 1. Header: Repo Info */}
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-zinc-100 dark:border-zinc-800/60 pb-5">
+        <div className="space-y-1.5">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            <h2 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
               {meta.fullName}
             </h2>
             {meta.isArchived && (
-              <span className="px-2 py-0.5 text-xs font-semibold bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 rounded-md border border-rose-300 dark:border-rose-800 flex items-center gap-1">
-                <ShieldAlert className="w-3.5 h-3.5" /> Archived
-              </span>
-            )}
-            {meta.isFork && (
-              <span className="px-2 py-0.5 text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-md">
-                Fork
+              <span className="px-2 py-0.5 text-xs font-medium bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 rounded-md border border-rose-200 dark:border-rose-800/60 flex items-center gap-1">
+                <ShieldAlert className="w-3 h-3" /> Archived
               </span>
             )}
             {meta.license && (
-              <span className="px-2 py-0.5 text-xs font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded-md border border-emerald-200 dark:border-emerald-800">
+              <span className="px-2 py-0.5 text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-md">
                 {meta.license.name}
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            {meta.description || "No repository description provided."}
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 max-w-xl leading-relaxed">
+            {meta.description || "No description provided."}
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1.5 rounded-lg">
-            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-            <span className="font-semibold text-slate-900 dark:text-white">{meta.stars.toLocaleString()}</span>
+        {/* Stars, Forks, External Link */}
+        <div className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400 shrink-0">
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-50 dark:bg-zinc-850 border border-zinc-200/60 dark:border-zinc-800">
+            <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+            <span className="font-semibold text-zinc-900 dark:text-zinc-100">{meta.stars.toLocaleString()}</span>
           </div>
-          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1.5 rounded-lg">
-            <GitFork className="w-4 h-4 text-slate-500" />
-            <span className="font-semibold text-slate-900 dark:text-white">{meta.forks.toLocaleString()}</span>
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-50 dark:bg-zinc-850 border border-zinc-200/60 dark:border-zinc-800">
+            <GitFork className="w-3.5 h-3.5 text-zinc-400" />
+            <span className="font-semibold text-zinc-900 dark:text-zinc-100">{meta.forks.toLocaleString()}</span>
           </div>
           <a
             href={meta.htmlUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-            title="Open on GitHub"
+            className="p-1.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
+            aria-label="View on GitHub"
           >
-            <ExternalLink className="w-4 h-4" />
+            <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>
       </div>
 
-      {/* 2. Language Breakdown Bar */}
+      {/* 2. Languages Bar */}
       {languageEntries.length > 0 && (
         <div className="space-y-1.5">
-          <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
-            <span className="font-medium">Languages</span>
-            <span>Default branch: <code className="font-mono text-emerald-600 dark:text-emerald-400">{meta.defaultBranch}</code></span>
+          <div className="flex justify-between text-xs text-zinc-500">
+            <span>Languages</span>
+            <span className="font-mono text-[11px]">Branch: {meta.defaultBranch}</span>
           </div>
-          <div className="flex h-2 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 gap-0.5">
+          <div className="flex h-1.5 rounded-full overflow-hidden bg-zinc-100 dark:bg-zinc-800 gap-0.5">
             {languageEntries.slice(0, 5).map(([lang, bytes], i) => {
               const pct = totalLangBytes > 0 ? (bytes / totalLangBytes) * 100 : 0;
               const colors = ["bg-emerald-500", "bg-teal-500", "bg-cyan-500", "bg-indigo-500", "bg-purple-500"];
@@ -99,14 +93,14 @@ export function EvidenceCard({ evidence, onSelectIssue }: EvidenceCardProps) {
               );
             })}
           </div>
-          <div className="flex flex-wrap gap-3 text-[11px] text-slate-500 dark:text-slate-400 pt-1">
+          <div className="flex flex-wrap gap-2.5 text-[11px] text-zinc-500 dark:text-zinc-400 pt-0.5">
             {languageEntries.slice(0, 4).map(([lang, bytes], i) => {
               const pct = totalLangBytes > 0 ? ((bytes / totalLangBytes) * 100).toFixed(1) : "0";
               const dots = ["text-emerald-500", "text-teal-500", "text-cyan-500", "text-indigo-500"];
               return (
                 <span key={lang} className="inline-flex items-center gap-1">
-                  <span className={`text-base ${dots[i % dots.length]}`}>•</span>
-                  <span className="font-medium text-slate-700 dark:text-slate-300">{lang}</span>
+                  <span className={dots[i % dots.length]}>•</span>
+                  <span className="font-medium text-zinc-700 dark:text-zinc-300">{lang}</span>
                   <span>{pct}%</span>
                 </span>
               );
@@ -115,213 +109,170 @@ export function EvidenceCard({ evidence, onSelectIssue }: EvidenceCardProps) {
         </div>
       )}
 
-      {/* 3. Governance Evidence Checklist */}
-      <div className="space-y-2.5">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-          <FileText className="w-3.5 h-3.5" /> Repository Governance & Templates
-        </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+      {/* 3. Governance Compact Cards with Green/Amber/Red Badges */}
+      <div className="space-y-2">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+          <FileText className="w-3 h-3" /> Governance &amp; Templates
+        </span>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {/* README */}
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-xs">
-            <span className="font-medium text-slate-700 dark:text-slate-300">README</span>
+          <div className="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-850/50 border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between text-xs">
+            <span className="font-medium text-zinc-700 dark:text-zinc-300 truncate mr-1">README</span>
             {governance.readme ? (
-              <a
-                href={governance.readme.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
-              >
-                <CheckCircle className="w-3.5 h-3.5" /> Found
-              </a>
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center gap-1 shrink-0">
+                <CheckCircle2 className="w-3 h-3" /> Found
+              </span>
             ) : (
-              <span className="text-slate-400 dark:text-slate-500 flex items-center gap-1">
-                <XCircle className="w-3.5 h-3.5" /> None
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 flex items-center gap-1 shrink-0">
+                <XCircle className="w-3 h-3" /> None
               </span>
             )}
           </div>
 
           {/* CONTRIBUTING */}
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-xs">
-            <span className="font-medium text-slate-700 dark:text-slate-300">CONTRIBUTING</span>
+          <div className="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-850/50 border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between text-xs">
+            <span className="font-medium text-zinc-700 dark:text-zinc-300 truncate mr-1">CONTRIBUTING</span>
             {governance.contributing ? (
-              <a
-                href={governance.contributing.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
-              >
-                <CheckCircle className="w-3.5 h-3.5" /> Found
-              </a>
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center gap-1 shrink-0">
+                <CheckCircle2 className="w-3 h-3" /> Found
+              </span>
             ) : (
-              <span className="text-amber-500 flex items-center gap-1" title="Not found in repo">
-                <AlertTriangle className="w-3.5 h-3.5" /> Absent
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center gap-1 shrink-0">
+                <AlertTriangle className="w-3 h-3" /> Missing
               </span>
             )}
           </div>
 
           {/* PR Template */}
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-xs">
-            <span className="font-medium text-slate-700 dark:text-slate-300">PR Template</span>
+          <div className="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-850/50 border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between text-xs">
+            <span className="font-medium text-zinc-700 dark:text-zinc-300 truncate mr-1">PR Template</span>
             {governance.prTemplate ? (
-              <a
-                href={governance.prTemplate.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
-              >
-                <CheckCircle className="w-3.5 h-3.5" /> Found
-              </a>
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center gap-1 shrink-0">
+                <CheckCircle2 className="w-3 h-3" /> Found
+              </span>
             ) : (
-              <span className="text-slate-400 dark:text-slate-500 flex items-center gap-1">
-                <XCircle className="w-3.5 h-3.5" /> None
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center gap-1 shrink-0">
+                <AlertTriangle className="w-3 h-3" /> None
               </span>
             )}
           </div>
 
           {/* Code of Conduct */}
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-xs">
-            <span className="font-medium text-slate-700 dark:text-slate-300">Code of Conduct</span>
+          <div className="p-3 rounded-lg bg-zinc-50/70 dark:bg-zinc-850/50 border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between text-xs">
+            <span className="font-medium text-zinc-700 dark:text-zinc-300 truncate mr-1">Code of Conduct</span>
             {governance.codeOfConduct ? (
-              <a
-                href={governance.codeOfConduct.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
-              >
-                <CheckCircle className="w-3.5 h-3.5" /> Found
-              </a>
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center gap-1 shrink-0">
+                <CheckCircle2 className="w-3 h-3" /> Found
+              </span>
             ) : (
-              <span className="text-slate-400 dark:text-slate-500 flex items-center gap-1">
-                <XCircle className="w-3.5 h-3.5" /> None
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-500 flex items-center gap-1 shrink-0">
+                <XCircle className="w-3 h-3" /> None
               </span>
             )}
           </div>
         </div>
       </div>
 
-      {/* 4. Ecosystem & CI/CD Evidence */}
-      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800 space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+      {/* 4. Ecosystem & CI Commands */}
+      <div className="p-4 rounded-xl bg-zinc-50/70 dark:bg-zinc-850/40 border border-zinc-200/60 dark:border-zinc-800 space-y-3">
+        <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
-            <Terminal className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            <span className="font-semibold text-slate-900 dark:text-white">
+            <Terminal className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span className="font-medium text-zinc-900 dark:text-zinc-100">
               Ecosystem: {ecosystem.ecosystem}
             </span>
             {ecosystem.packageManager && (
-              <span className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-mono">
+              <span className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-750 text-zinc-600 dark:text-zinc-300 text-[10px] font-mono">
                 {ecosystem.packageManager}
               </span>
             )}
           </div>
-          <div className="text-slate-500 dark:text-slate-400">
-            Git Tree: <strong className="text-slate-700 dark:text-slate-300">{tree.totalFiles.toLocaleString()}</strong> files indexed
-          </div>
+          <span className="text-[11px] text-zinc-400">
+            {tree.totalFiles.toLocaleString()} files indexed
+          </span>
         </div>
 
-        {/* Commands */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-          <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Test Command</span>
-            <div className="font-mono text-emerald-700 dark:text-emerald-300 truncate">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+          <div className="p-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
+            <div className="text-[10px] uppercase font-semibold text-zinc-400">Test Command</div>
+            <div className="font-mono text-emerald-600 dark:text-emerald-400 truncate text-[11px] mt-0.5">
               {ecosystem.testCommands[0] || "Not found in repo"}
             </div>
           </div>
-          <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Lint Command</span>
-            <div className="font-mono text-cyan-700 dark:text-cyan-300 truncate">
+          <div className="p-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
+            <div className="text-[10px] uppercase font-semibold text-zinc-400">Lint Command</div>
+            <div className="font-mono text-cyan-600 dark:text-cyan-400 truncate text-[11px] mt-0.5">
               {ecosystem.lintCommands[0] || "Not found in repo"}
             </div>
           </div>
-          <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Commit Convention</span>
-            <div className="font-mono text-indigo-700 dark:text-indigo-300 capitalize truncate">
+          <div className="p-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
+            <div className="text-[10px] uppercase font-semibold text-zinc-400">Commit Convention</div>
+            <div className="font-mono text-indigo-600 dark:text-indigo-400 capitalize truncate text-[11px] mt-0.5">
               {commitStyle.style}
             </div>
           </div>
         </div>
       </div>
 
-      {/* 5. Issue Evidence: Either Selected Issue OR Good First Issues Picker */}
+      {/* 5. Issue Section */}
       {issue ? (
-        <div className="p-4 rounded-xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20 space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-50/20 dark:bg-emerald-950/10 space-y-2">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-600 text-white">
-                #{issue.number} {issue.state}
+              <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-600 text-white font-mono">
+                #{issue.number}
               </span>
-              <h4 className="font-semibold text-slate-900 dark:text-white text-sm sm:text-base">
+              <span className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">
                 {issue.title}
-              </h4>
+              </span>
             </div>
             <a
               href={issue.htmlUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+              className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1 shrink-0"
             >
-              Open on GitHub <ExternalLink className="w-3.5 h-3.5" />
+              GitHub <ExternalLink className="w-3 h-3" />
             </a>
           </div>
-
           {issue.body && (
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 line-clamp-3 bg-white/60 dark:bg-slate-900/60 p-3 rounded-lg border border-slate-200/60 dark:border-slate-800 font-sans">
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 bg-white/70 dark:bg-zinc-900/70 p-2.5 rounded border border-zinc-200/40 dark:border-zinc-800/60">
               {issue.body}
             </p>
           )}
-
-          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-            <span>Author: @{issue.author}</span>
-            <span>•</span>
-            <span>
-              Assignees: {issue.assignees.length > 0 ? `@${issue.assignees.join(", @")}` : "None (Available)"}
-            </span>
-            <span>•</span>
-            <span>Comments: {issue.commentsCount}</span>
-          </div>
         </div>
       ) : suggestedIssues.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              Suggested &quot;Good First Issues&quot; ({suggestedIssues.length})
-            </h3>
-            <span className="text-[11px] text-slate-400">Click to synthesize plan</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-amber-500" />
+              Suggested First Issues ({suggestedIssues.length})
+            </span>
+            <span className="text-[10px] text-zinc-400">Select one to target</span>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {suggestedIssues.map((sug) => (
               <div
                 key={sug.number}
-                className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/40 dark:hover:bg-slate-800/80 border border-slate-200/70 dark:border-slate-800 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="p-2.5 rounded-lg bg-zinc-50/60 hover:bg-zinc-100/80 dark:bg-zinc-850/40 dark:hover:bg-zinc-800/60 border border-zinc-200/50 dark:border-zinc-800 transition-colors flex items-center justify-between gap-3 text-xs"
               >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                      #{sug.number}
-                    </span>
-                    <a
-                      href={sug.htmlUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-slate-900 dark:text-white hover:underline flex items-center gap-1"
-                    >
-                      {sug.title}
-                    </a>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{sug.reason}</p>
+                <div className="truncate mr-2">
+                  <span className="font-mono text-emerald-600 dark:text-emerald-400 font-semibold mr-1.5">
+                    #{sug.number}
+                  </span>
+                  <span className="text-zinc-800 dark:text-zinc-200 font-medium">
+                    {sug.title}
+                  </span>
                 </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  {onSelectIssue && (
-                    <button
-                      onClick={() => onSelectIssue(sug.number)}
-                      className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-colors shadow-sm min-h-[36px]"
-                    >
-                      Select Issue
-                    </button>
-                  )}
-                </div>
+                {onSelectIssue && (
+                  <button
+                    onClick={() => onSelectIssue(sug.number)}
+                    className="shrink-0 px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-medium transition-colors min-h-[30px]"
+                  >
+                    Select
+                  </button>
+                )}
               </div>
             ))}
           </div>
